@@ -1,0 +1,4 @@
+[plugin]
+name = "httk-workflow-abinit"
+description = "Example ABINIT workflow packages (ground-state SCF)"
+workflows = ["workflows/abinit-scf"]

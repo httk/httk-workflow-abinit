@@ -1,0 +1,43 @@
+# One ABINIT ground-state SCF calculation of one structure: a small, complete
+# workflow package to copy and edit. See run.py for what the step does.
+
+[workflow]
+name = "abinit.scf"
+description = "one ABINIT self-consistent-field calculation of one structure"
+requires = ["httk-workflow>=2.1.1", "httk-workflow-abinit>=0.1.0", "httk-atomistic>=2.1.2"]
+
+[workflow.runner]
+entry = "run.py"
+steps = ["run"]
+# The persistent workdir holds the result; collect.py reads run.abo from it.
+data_mode = "none"
+
+[workflow.inputs.structure]
+destination = "POSCAR"
+role = "initial_structure"
+entry_type = "structures"
+required = true
+
+[workflow.parameters.pseudopotentials]
+type = "object"
+description = "Species name -> pseudopotential file name, e.g. {\"Si\": \"Si.psp8\"}; the files are read from the abinit.pseudo_dir setting, default the job's files/."
+
+[workflow.parameters.ecut_ha]
+type = "number"
+default = 15
+description = "Plane-wave kinetic-energy cutoff in Ha."
+
+[workflow.parameters.kpoints]
+type = "array"
+default = [4, 4, 4]
+description = "Unshifted Monkhorst-Pack grid."
+
+[workflow.outputs.total_energy]
+entry_type = "records"
+role = "total_energy"
+ref = "https://schemas.httk.org/defs/v0.1/properties/core/total_energy"
+description = "The converged total energy of the structure, in eV."
+product_of = "initial_structure"
+
+[workflow.collect]
+file = "collect.py"

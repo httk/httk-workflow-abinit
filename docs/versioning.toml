@@ -1,0 +1,17 @@
+[site]
+slug = "httk-workflow-abinit"
+repository-url = "https://github.com/httk/httk-workflow-abinit"
+main-branch = "main"
+import-roots = ["httk/codes", "httk/codes/abinit", "httk/registry"]
+
+[[internal-dependency]]
+distribution = "httk-core"
+slug = "httk-core"
+repository-url = "https://github.com/httk/httk-core"
+main-branch = "main"
+
+[[internal-dependency]]
+distribution = "httk-workflow"
+slug = "httk-workflow"
+repository-url = "https://github.com/httk/httk-workflow"
+main-branch = "main"
