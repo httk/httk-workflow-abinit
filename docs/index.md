@@ -5,7 +5,7 @@ documentation of *httk₂*, see [docs.httk.org](https://docs.httk.org).
 
 The module adds ABINIT support to *httk-workflow*: the Python helpers in
 `httk.codes.abinit` (input writing, output parsing, diagnostics, supervised
-execution and a result collector), the Bash API a Bash runner sources as
+execution and result-reading helpers), the Bash API a Bash runner sources as
 `$HTTK_WORKFLOW_ABINIT_BASH_API`, and the `abinit-*` bridge commands behind that
 API. Installing it registers the `abinit` code with *httk₂* through the
 `httk.registry.codes.abinit` registration package. The repository also carries

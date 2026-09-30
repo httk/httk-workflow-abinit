@@ -2,9 +2,10 @@
 
 ``inputs`` writes ABINIT inputs, ``outputs`` parses its main ``.abo`` output,
 ``diagnostics`` classifies a finished calculation, ``reports`` runs it under
-supervision, and ``collect`` turns a finished job into workflow outputs. This
-package is a thin facade re-exporting their surface. The example workflow
-package ``workflows/abinit-scf`` in this distribution's repository builds on it.
+supervision, and ``collect`` reads workflow outputs out of result files, for
+workflow collect hooks. This package is a thin facade re-exporting their
+surface. The example workflow package ``workflows/abinit-scf`` in this
+distribution's repository builds on it.
 """
 
 from httk.core import register_citation
@@ -26,7 +27,6 @@ register_citation(
     ),
 )
 
-from .collect import collect_abinit
 from .diagnostics import diagnose_abinit
 from .inputs import write_abinit_input
 from .outputs import HA_TO_EV, AbinitResult, parse_abinit_output
@@ -36,7 +36,6 @@ __all__ = [
     "HA_TO_EV",
     "AbinitResult",
     "AbinitRunReport",
-    "collect_abinit",
     "diagnose_abinit",
     "parse_abinit_output",
     "run_abinit",

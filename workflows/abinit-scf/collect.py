@@ -1,12 +1,15 @@
-"""Collect hook for the ``abinit.scf`` workflow."""
+"""Collect hook for the ``abinit.scf`` workflow.
 
-from httk.codes.abinit import collect_abinit
+The run leaves ``run.abo`` in the persistent workdir.
+"""
+
+from httk.codes.abinit.collect import read_total_energy
 
 
 def collect(record):
-    """Extract the converged total energy from the job record.
+    """Return the converged total energy of the run.
 
     :param record: The collected job record.
     :return: The ``total_energy`` output role.
     """
-    return collect_abinit(record)
+    return {"total_energy": read_total_energy(record.result_file("run.abo"))}
