@@ -114,7 +114,7 @@ httk workspace settings set --key abinit.command --value 'mpirun -np 4 abinit' W
 httk job new --workflow abinit.scf --input structure=POSCAR --file Si.psp8=Si.psp8 \
     --parameter 'pseudopotentials={"Si": "Si.psp8"}'
 httk workflow run
-httk workflow collect --into results.sqlite
+httk collect --into results.sqlite
 ```
 
 Its parameters are `pseudopotentials` (species name to file name), `ecut_ha`
@@ -138,3 +138,17 @@ from httk.codes.abinit.collect import read_total_energy
 def collect(record):
     return {"total_energy": read_total_energy(record.result_file("run.abo"))}
 ```
+
+### Recognized calculations
+
+The `abinit.calculation` collector lets `httk.workflow.collect_tree(root)` (and
+`httk collect DIR --into db.sqlite`) collect finished, free-standing ABINIT
+runs without a workspace. A directory is recognized when it holds exactly one
+`*.abo` output whose first 100 lines carry
+the `.Version ... of ABINIT` banner, found by
+{py:func}`~httk.codes.abinit.collect.find_outputs`, and the input `<stem>.abi`
+beside it (compressed or not). A `slurm-*.out` log is ignored. Several ABINIT
+outputs in one directory, or a missing input, are reported as unclaimed; an
+unconverged run is claimed and then reported as a degraded item. The claim is
+identified by the content of the input file. The collected role is
+`total_energy`.

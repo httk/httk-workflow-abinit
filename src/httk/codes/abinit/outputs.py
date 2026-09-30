@@ -1,13 +1,15 @@
 """Parse the main text output (``.abo``) of ABINIT.
 
-Pure stdlib parsing: nothing here runs a program or imports *httk* code, so a
-result can be read anywhere the output file is.
+Nothing here runs a program, so a result can be read anywhere the output file
+is; compressed outputs are read through :func:`httk.core.datastream.compression.open_compressed`.
 """
 
 import os
 import re
 from dataclasses import dataclass
 from pathlib import Path
+
+from httk.core.datastream.compression import open_compressed
 
 __all__ = ["HA_TO_EV", "AbinitResult", "parse_abinit_output"]
 
@@ -69,7 +71,12 @@ def parse_abinit_output(path: str | os.PathLike[str]) -> AbinitResult:
     :raises FileNotFoundError: If the output file does not exist.
     """
 
-    return _parse(Path(path).read_text(encoding="utf-8", errors="replace"))
+    return _parse(_text(Path(path)))
+
+
+def _text(path: Path) -> str:
+    with path.open("rb") as raw, open_compressed(raw, compression="extension", name=path.name) as stream:
+        return stream.read().decode("utf-8", errors="replace")
 
 
 def _read(path: Path) -> str:
