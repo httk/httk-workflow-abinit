@@ -1,5 +1,6 @@
 """``read_total_energy`` gates on a converged energy; the hook reads ``run.abo``."""
 
+import bz2
 import runpy
 import shutil
 from pathlib import Path, PurePosixPath
@@ -23,6 +24,15 @@ def test_a_converged_scf_is_read() -> None:
 def test_an_unconverged_scf_is_refused() -> None:
     with pytest.raises(ValueError, match="no converged total energy"):
         read_total_energy(DATA / "si_noconv.abo")
+
+
+@pytest.mark.parametrize("compressed", [False, True])
+def test_an_scf_with_energy_but_no_completion_footer_is_refused(tmp_path: Path, compressed: bool) -> None:
+    data = (DATA / "si.abo").read_bytes().replace(b"Calculation completed.", b"")
+    path = tmp_path / ("run.abo.bz2" if compressed else "run.abo")
+    path.write_bytes(bz2.compress(data) if compressed else data)
+    with pytest.raises(ValueError, match="incomplete.*Calculation completed"):
+        read_total_energy(path)
 
 
 def test_the_packaged_hook_reads_the_workdir_output(tmp_path: Path) -> None:

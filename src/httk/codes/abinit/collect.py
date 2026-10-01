@@ -50,10 +50,13 @@ def read_total_energy(path: Path) -> DataRecord:
 
     :param path: The ABINIT output file.
     :return: The ``total_energy`` property as a data record.
-    :raises ValueError: If the file holds no converged total energy.
+    :raises ValueError: If the file is incomplete or holds no converged total energy.
     """
 
-    energy = parse_abinit_output(path).total_energy_ev
+    result = parse_abinit_output(path)
+    energy = result.total_energy_ev
     if energy is None:
         raise ValueError(f"{path} holds no converged total energy")
+    if not result.completed:
+        raise ValueError(f"{path} is incomplete: ABINIT did not report Calculation completed.")
     return DataRecord.from_value(_TOTAL_ENERGY_DEFINITION, _TOTAL_ENERGY_NAME, energy)
