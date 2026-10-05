@@ -10,7 +10,7 @@ when the calculation is not clean.
 Settings, resolved job parameter -> ``HTTK_*`` variable -> workspace setting:
 
 * ``abinit.command``: the command that starts ABINIT (default ``abinit``), e.g.
-  ``mpirun -np 4 abinit``;
+  ``abinit`` (the attempt's launch prefix supplies the parallel start);
 * ``abinit.pseudo_dir``: the directory holding the pseudopotential files
   (default: this job's ``files/``).
 """

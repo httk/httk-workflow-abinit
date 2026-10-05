@@ -31,7 +31,7 @@ write_abinit_input(
     kpoints=(4, 4, 4),
     extra={"toldfe": 1e-10},
 )
-report = run_abinit(["mpirun", "-np", "4", "abinit"], timeout=3600)
+report = run_abinit(["abinit"], timeout=3600)
 if report.ok:
     print(report.result.total_energy_ev)
 else:
@@ -86,14 +86,16 @@ source "$HTTK_WORKFLOW_BASH_API"
 source "$HTTK_WORKFLOW_ABINIT_BASH_API"
 
 httk_abinit_write_input --options options.json   # the write_abinit_input keywords as JSON
-httk_abinit_run --timeout 3600 -- mpirun -np 4 abinit
+httk_abinit_run --timeout 3600 -- abinit
 energy=$(httk_abinit_energy --unit ev)
 ```
+
+The command names only the program: the attempt's launch prefix (the parallel start, the `HTTK_WORKFLOW_LAUNCH` variable the workflow manager sets from the `manager.launch_template` setting, or the built-in Slurm prefix) is prepended to it, and `--no-launch` (`launch=False` in Python) runs the command as given. A command that already starts with a launcher such as `mpirun` or `srun` is refused when a prefix applies.
 
 | Function | Bridge command | Exit status |
 | --- | --- | --- |
 | `httk_abinit_write_input --options FILE [--input run.abi]` | `abinit-write-input` | `0` |
-| `httk_abinit_run [--directory] [--input] [--log] [--timeout] -- CMD...` | `abinit-run` | `0` completed, `20` crashed, `21` nonconverged, `22` process failure, `124` timeout (as `vasp-run`); prints the report path |
+| `httk_abinit_run [--directory] [--input] [--log] [--timeout] [--no-launch] -- CMD...` | `abinit-run` | `0` completed, `20` crashed, `21` nonconverged, `22` process failure, `124` timeout (as `vasp-run`); prints the report path |
 | `httk_abinit_energy [--output run.abo] [--unit ha\|ev]` | `abinit-energy` | `0` and the energy, `1` when there is none |
 | `httk_abinit_converged [--output run.abo]` | `abinit-converged` | `0` converged, `1` not converged or unknown |
 | `httk_abinit_diagnose [--output run.abo] [--json]` | `abinit-diagnose` | `0` clean, `20` when it printed diagnostics |
@@ -110,7 +112,7 @@ diagnostic code when the calculation is not clean. Install it with
 `--workflow-dir`:
 
 ```console
-httk workspace settings set --key abinit.command --value 'mpirun -np 4 abinit' WORKSPACE
+httk workspace settings set --key abinit.command --value abinit WORKSPACE
 httk job new --workflow abinit.scf --input structure=POSCAR --file Si.psp8=Si.psp8 \
     --parameter 'pseudopotentials={"Si": "Si.psp8"}'
 httk workflow run

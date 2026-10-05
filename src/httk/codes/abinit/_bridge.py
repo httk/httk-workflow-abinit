@@ -35,6 +35,7 @@ def add_commands(commands: "argparse._SubParsersAction[argparse.ArgumentParser]"
     run.add_argument("--input", default="run.abi")
     run.add_argument("--log", default="abinit.log")
     run.add_argument("--timeout", type=float)
+    run.add_argument("--launch", action=argparse.BooleanOptionalAction, default=None)
     run.add_argument("argv", nargs=argparse.REMAINDER)
     energy = commands.add_parser("abinit-energy")
     energy.add_argument("--output", default="run.abo")
@@ -67,6 +68,7 @@ def run_command(arguments: argparse.Namespace) -> int:
             input_file=arguments.input,
             log_file=arguments.log,
             timeout=arguments.timeout,
+            launch=arguments.launch,
         )
         print(Path(arguments.directory, "abinit-run-report.json"))
         return _RUN_EXIT[report.classification]

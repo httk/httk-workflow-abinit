@@ -6,7 +6,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
-from httk.workflow.codes import Diagnostic, ProcessReport, ProcessSupervisor, write_json_atomic
+from httk.workflow.codes import Diagnostic, ProcessReport, ProcessSupervisor, launch_command, write_json_atomic
 
 from .diagnostics import diagnose_abinit
 from .outputs import AbinitResult, _parse, _read
@@ -70,13 +70,13 @@ def run_abinit(
     input_file: str = "run.abi",
     log_file: str = "abinit.log",
     timeout: float | None = None,
+    launch: bool | None = None,
     termination_grace: float = 10.0,
     report_path: str | os.PathLike[str] = "abinit-run-report.json",
 ) -> AbinitRunReport:
     """Run ABINIT under supervision and write a classified report.
 
-    *argv* is the command that starts ABINIT, including any launcher such as
-    ``mpirun -np 4 abinit``; *input_file* is appended to it, the ABINIT 10
+    *argv* names the program (for example ``["abinit"]``); *input_file* is appended to it, the ABINIT 10
     ``abinit run.abi`` invocation. ABINIT names its main output after the input,
     ``<input stem>.abo`` (``run.abo``), and that is the file parsed; an input
     that sets ``output_file`` itself is not supported. Standard output (ABINIT's
@@ -85,11 +85,17 @@ def run_abinit(
     would otherwise write ``run.abo0001`` and leave the stale ``run.abo`` to be
     mistaken for this run's.
 
+    The attempt's launch prefix (the parallel start, ``HTTK_WORKFLOW_LAUNCH``) is prepended by default;
+    ``launch=False`` runs *argv* as given, and a command that already starts with a launcher such as ``srun``
+    or ``mpirun`` is refused with :class:`ValueError` when a prefix applies.
+
     :param argv: The ABINIT command argument vector, without the input file.
     :param directory: Run ABINIT in this directory.
     :param input_file: The input file name in *directory*.
     :param log_file: Save standard output under this name in *directory*.
     :param timeout: Stop the process after this many seconds when set.
+    :param launch: Prepend the attempt's launch prefix when true, the default (``None``);
+        ``False`` runs *argv* as given.
     :param termination_grace: Allow this many seconds for graceful termination.
     :param report_path: Write the report at this directory-relative path.
     :return: The classified run report.
@@ -102,7 +108,7 @@ def run_abinit(
     log = root / log_file
     # ponytail: no live monitor or remedy ladder; add them when a real campaign needs them.
     process = ProcessSupervisor().run(
-        [*argv, input_file],
+        [*launch_command(argv, launch=launch is not False), input_file],
         timeout=timeout,
         cwd=root,
         termination_grace=termination_grace,
