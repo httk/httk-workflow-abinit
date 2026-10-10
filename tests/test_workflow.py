@@ -15,6 +15,7 @@ def test_invalid_input_options_fail_as_input_invalid(
 ) -> None:
     pytest.importorskip("httk.atomistic")
     from httk.workflow import TaskManager, Workspace
+    from httk.workflow.collecting import job_records
     from httk.workflow.scaffold import new_job
 
     workspace = Workspace.initialize(tmp_path / "workspace")
@@ -27,10 +28,10 @@ def test_invalid_input_options_fail_as_input_invalid(
         inputs={"structure": tmp_path / "POSCAR"},
         files={"Si.psp8": DATA / "Si.psp8"},
         parameters={"pseudopotentials": {"Si": "Si.psp8"}, **parameters},
+        install=True,
     )
     with TaskManager(workspace, heartbeat_interval=0.01) as manager:
         manager.run_until_idle(timeout=120.0)
-    marker = workspace.find_marker_by_id(job.job_id)
-    assert marker is not None and marker.kind == "failed"
-    failure = workspace.read_state(marker).get("failure")
-    assert isinstance(failure, dict) and failure["code"] == "abinit.input_invalid", failure
+    [record] = job_records(workspace, states=("succeeded", "failed"))
+    assert (record.job_id, record.state) == (job.job_id, "failed")
+    assert record.failure is not None and record.failure.code == "abinit.input_invalid", record.failure

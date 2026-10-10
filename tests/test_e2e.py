@@ -25,6 +25,7 @@ def test_abinit_scf_runs_abinit_and_collects_the_total_energy(
     from httk.core import DataRecord, Run
     from httk.core.cli import CLIContext
     from httk.workflow import TaskManager, Workspace
+    from httk.workflow.collecting import job_records
     from httk.workflow.registry import register_workspace
     from httk.workflow.scaffold import new_job
     from httk.workflow.workflow_cli import command
@@ -38,12 +39,12 @@ def test_abinit_scf_runs_abinit_and_collects_the_total_energy(
         inputs={"structure": tmp_path / "POSCAR"},
         files={"Si.psp8": DATA / "Si.psp8"},
         parameters={"pseudopotentials": {"Si": "Si.psp8"}, "ecut_ha": 8, "kpoints": [2, 2, 2]},
+        install=True,
     )
     with TaskManager(workspace, heartbeat_interval=0.01) as manager:
         manager.run_until_idle(timeout=600.0)
-    marker = workspace.find_marker_by_id(job.job_id)
-    assert marker is not None
-    assert marker.kind == "succeeded", workspace.read_state(marker).get("failure")
+    [record] = job_records(workspace, states=("succeeded", "failed"))
+    assert (record.job_id, record.state) == (job.job_id, "succeeded"), record.failure
 
     register_workspace("abinit", str(workspace.root))
     database = tmp_path / "results.sqlite"

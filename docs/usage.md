@@ -113,7 +113,7 @@ diagnostic code when the calculation is not clean. Install it with
 
 ```console
 httk workspace settings set --key abinit.command --value abinit WORKSPACE
-httk job new --workflow abinit.scf --input structure=POSCAR --file Si.psp8=Si.psp8 \
+httk job new --install --workflow abinit.scf --input structure=POSCAR --file Si.psp8=Si.psp8 \
     --parameter 'pseudopotentials={"Si": "Si.psp8"}'
 httk workflow run
 httk collect --into results.sqlite
