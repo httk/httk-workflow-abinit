@@ -15,6 +15,10 @@ def test_abinit_is_a_known_code_with_its_packaged_bash_api() -> None:
     assert code_support("abinit").bash_api_path() == Path(str(files("httk.codes.abinit").joinpath("httk-abinit.sh")))
 
 
+def test_abinit_declares_its_application_settings() -> None:
+    assert code_support("abinit").settings == ("abinit.command", "abinit.pseudo_dir")
+
+
 def test_the_bridge_mounts_the_abinit_commands() -> None:
     parser = argparse.ArgumentParser()
     code_support("abinit").resolve_bridge().add_commands(parser.add_subparsers(dest="command"))
