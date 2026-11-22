@@ -109,13 +109,13 @@ one Python runner step that stages the `structure` input and the
 pseudopotentials, writes `run.abi`, runs ABINIT, and fails with the first
 diagnostic code when the calculation is not clean. Install it with
 `httk plugin install` of the repository, or use it directly with
-`--workflow-dir`:
+`httk job new DIR`:
 
 ```console
-httk workspace settings set --key abinit.command --value abinit WORKSPACE
-httk job new --install --workflow abinit.scf --input structure=POSCAR --file Si.psp8=Si.psp8 \
+httk workspace set -w WORKSPACE abinit.command=abinit
+httk job new --install abinit.scf --input structure=POSCAR --file Si.psp8=Si.psp8 \
     --parameter 'pseudopotentials={"Si": "Si.psp8"}'
-httk workflow run
+httk run
 httk collect --into results.sqlite
 ```
 
